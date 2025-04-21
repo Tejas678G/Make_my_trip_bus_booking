@@ -1,92 +1,168 @@
-<?php
-	session_start();
-?>
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-	<title>LMS</title>
-	<meta charset="utf-8" name="viewport" content="width=device-width,intial-scale=1">
-	<link rel="stylesheet" type="text/css" href="bootstrap-4.4.1/css/bootstrap.min.css">
-  	<script type="text/javascript" src="bootstrap-4.4.1/js/juqery_latest.js"></script>
-  	<script type="text/javascript" src="bootstrap-4.4.1/js/bootstrap.min.js"></script>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+  <title>Bus Booking</title>
+
 </head>
-<style type="text/css">
-	#main_content{
-		padding: 50px;
-		background-color: whitesmoke;
-	}
-	#side_bar{
-		background-color: whitesmoke;
-		padding: 50px;
-		width: 300px;
-		height: 450px;
-	}
-</style>
+
+
 <body>
-	<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-		<div class="container-fluid">
-			<div class="navbar-header">
-				<a class="navbar-brand" href="index.php">Make My Trip</a>
-			</div>
-		    <ul class="nav navbar-nav navbar-right">
-		      <li class="nav-item">
-		        <a class="nav-link" href="signup.php"></span>Register</a>
-		      </li>
-		      <li class="nav-item">
-		        <a class="nav-link" href="index.php">Login</a>
-		      </li>
-		    </ul>
-		</div>
-	</nav><br>
-	<span><marquee>This is the official Make My Trip Website</marquee></span><br><br>
-	
-		<div class="col-md-8" id="main_content">
-			<center><h3><u>User Login Form</u></h3></center>
-			<form action="" method="post">
-				<div class="form-group">
-					<label for="email">Email ID:</label>
-					<input type="text" name="email" class="form-control" required>
-				</div>
-				<div class="form-group">
-					<label for="password">Password:</label>
-					<input type="password" name="password" class="form-control" required>
-				</div>
-				<button type="submit" name="login" class="btn btn-primary">Login</button> |
-				<a href="signup.php"> Not registered yet ?</a>	
-			</form>
-			<?php 
-				if(isset($_POST['login'])){
-					$connection = mysqli_connect("localhost","root","");
-					$db = mysqli_select_db($connection,"libms");
-					
-					// Check if email exists in the database
-					$query = "select * from users where email = '$_POST[email]'";
-					$query_run = mysqli_query($connection,$query);
-					
-					// If no rows are returned, email is not registered
-					if(mysqli_num_rows($query_run) == 0){
-						?>
-						<br><br><center><span class="alert-danger">Email not registered!</span></center>
-						<?php
-					} else {
-						// Email exists, now check password
-						while ($row = mysqli_fetch_assoc($query_run)) {
-							if($row['password'] == $_POST['password']){
-								$_SESSION['name'] =  $row['name'];
-								$_SESSION['email'] =  $row['email'];
-								$_SESSION['id'] =  $row['id'];
-								header("Location: user_dashboard.php");
-								exit();
-							} else {
-								?>
-								<br><br><center><span class="alert-danger">Wrong Password!</span></center>
-								<?php
-							}
-						}
-					}
-				}
-			?>
-		</div>
-	</div>
+<?php session_start() ?>
+<?php
+
+  header('index.php?page=home');
+ include 'header.php'; ?>
+<?php if(isset($_SESSION['login_id'])) include 'admin_navbar.php'; else include 'navbar.php'; ?>
+
+<div class="toast" id="alert_toast" role="alert" aria-live="assertive" aria-atomic="true">
+  <div class="toast-body text-white">
+  </div>
+</div>
+
+    <?php 
+    if(isset($_GET['page']) && !empty($_GET['page']))
+      include($_GET['page'].'.php');
+    else
+      include('home.php');
+
+    ?>
+   
+    <div class="modal fadeIn" tabindex="-1" id="uni_modal">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title"></h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary submit" onclick="$('#uni_modal form').submit()">
+              <?php echo isset($_SESSION['login_id']) ? 'Save' : 'Find' ?> 
+          </button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal fadeIn" tabindex="-1" id="confirm_modal">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Confirmation</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" id="confirm" onclick="">Continue</button>
+            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fadeIn" tabindex="-1" id="book_modal">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title"></h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+
+          </div>
+          
+        </div>
+      </div>
+    </div>
+
+  <!-- ======= Footer ======= -->
+  <footer id="footer">
+
+    <div class="container-fluid d-md-flex py-4">
+
+      <div class="mr-md-auto text-center text-md-left">
+        <div class="copyright">
+          &copy; Copyright <strong><span><a href="https://www.sourcecodester.com/" target="_blank">soucecodester.com</a></span></strong>. All Rights Reserved
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <div id="preloader"></div>
+  <a href="#" class="back-to-top"><i class="icofont-simple-up"></i></a>
+  <script src="assets/js/main.js"></script>
+
 </body>
+<script>
+  window.uni_modal =  function($title='',$url='',$book = 0){
+    $('#uni_modal .modal-title').html($title);
+        start_load();
+
+    $.ajax({
+      url:$url,
+      error:err=>console.log(err),
+      success:function(resp){
+        $('#uni_modal .modal-body').html(resp)
+        if('<?php echo !isset($_SESSION['login_id']) ?>' == 1){
+                if($book == 1){
+                   $('#uni_modal .submit').html('Book')
+                }else{
+                   $('#uni_modal .submit').html('Find')
+        
+                }
+              }
+        $('#uni_modal .modal-footer').show()
+        $('#uni_modal').modal('show')
+      },
+      complete:function(){
+        end_load();
+
+      }
+    })
+  }
+  window._conf = function($msg='',$func='',$params = []){
+     $('#confirm_modal #confirm').attr('onclick',$func+"("+$params.join(',')+")")
+     $('#confirm_modal .modal-body').html($msg)
+     $('#confirm_modal').modal('show')
+  }
+  window.start_load = function(){
+    $('body').prepend('<di id="preloader2"></di>')
+  }
+  window.end_load = function(){
+    $('#preloader2').fadeOut('fast', function() {
+        $(this).remove();
+      })
+  }
+  window.alert_toast= function($msg = 'TEST',$bg = 'success'){
+      $('#alert_toast').removeClass('bg-success')
+      $('#alert_toast').removeClass('bg-danger')
+      $('#alert_toast').removeClass('bg-info')
+      $('#alert_toast').removeClass('bg-warning')
+
+    if($bg == 'success')
+      $('#alert_toast').addClass('bg-success')
+    if($bg == 'danger')
+      $('#alert_toast').addClass('bg-danger')
+    if($bg == 'info')
+      $('#alert_toast').addClass('bg-info')
+    if($bg == 'warning')
+      $('#alert_toast').addClass('bg-warning')
+    $('#alert_toast .toast-body').html($msg)
+    $('#alert_toast').toast({delay:3000}).toast('show');
+  }
+  $(document).ready(function(){
+  })
+</script>
 </html>
